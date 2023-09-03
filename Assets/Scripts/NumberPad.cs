@@ -9,8 +9,9 @@ public class NumberPad : MonoBehaviour
 {
     [SerializeField] private TMP_Text screenText;
     private int codeLength = 4;
+    private string inputCode;
     private string correctCode = "1443";
-    [SerializeField] private GameObject card;
+    [SerializeField] private KeyCard card;
     //[SerializeField] private GameObject cardPrefab;
     //[SerializeField] private GameObject ejectPosition;
     private Material unlockedMaterial;
@@ -18,27 +19,36 @@ public class NumberPad : MonoBehaviour
     private PlaySoundsFromList keyPressPlayer;
     private PushButton[] pushButtons;
     private int digitsEntered;
+    private bool numPadDisabled;
     
     private void Awake()
     {
         keyPressPlayer = GetComponent<PlaySoundsFromList>();
-        
+       
     }
 
     // for push button test
     private void Start()
     {
-        pushButtons = FindObjectsOfType<PushButton>();
+        //pushButtons = FindObjectsOfType<PushButton>();
         
-        foreach (PushButton button in pushButtons)
+        /*foreach (PushButton button in pushButtons)
         {
             button.OnPress += OnNumpadKeyPressed;
-        }
+        }*/
     }
 
     public void OnNumpadKeyPressed(String keyText)
     {
+        if (numPadDisabled)
+            return;
+        
         digitsEntered++;
+        keyPressPlayer.PlayAtIndex(0);
+        screenText.color = Color.black; // toggle color thing
+        inputCode += keyText;
+        screenText.text = inputCode;
+        
         // Validate that the last digit in the sequence has completed the code
         if (digitsEntered == codeLength/*screenText.text.Length == codeLength - 1*/)
         {
@@ -46,10 +56,11 @@ public class NumberPad : MonoBehaviour
             {
                 screenText.color = Color.green;
                 screenText.text = "Code is valid. Card is unlocked";
-                card.GetComponent<MeshRenderer>().material = unlockedMaterial;
-                
-                // Unlock
+                card.ActivateCard();
+                numPadDisabled = true;
+
                 // disable terminal
+                // Eject card from dispenser
                 //screenText.text = "Code is valid. Please receive card";
                 //Instantiate(cardPrefab, ejectPosition.transform.position, transform.rotation);
             }
@@ -57,14 +68,10 @@ public class NumberPad : MonoBehaviour
             {
                 screenText.color = Color.red;
                 screenText.text = "Invalid Code";
+                inputCode = "";
                 digitsEntered = 0;
             }
         }
-
-        
-        keyPressPlayer.PlayAtIndex(0);
-        screenText.color = Color.black;
-        screenText.text += keyText;
     }
 
     public void SetValidCode(string newCode)

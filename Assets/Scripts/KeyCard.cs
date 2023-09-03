@@ -1,18 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit;
 
-public class KeyCard : MonoBehaviour
+public class KeyCard : XRGrabInteractable
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+   [SerializeField] private ChangeMaterial materialChanger;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+   public void ActivateCard()
+   {
+      materialChanger.SetOtherMaterial();
+   }
 }

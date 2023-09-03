@@ -24,7 +24,7 @@ public class DoorHandle : XRBaseInteractable
     private Vector3 pullDistance;
     private Vector3 pullStartPos;
     private AudioSource audioSource;
-    
+
     // return dot product, abs.nära 1 = no effect. Därefter gradvis starkare. Multiplicationfactor
 
     protected override void Awake()
@@ -33,17 +33,20 @@ public class DoorHandle : XRBaseInteractable
         audioSource = GetComponent<AudioSource>();
     }
 
+ 
+
     protected override void OnEnable()
     {
         base.OnEnable();
         FindObjectOfType<CardReader>().unlockEvent += UnlockDoor;
     }
 
-    protected override void OnDisable()
+    protected override void OnDestroy()
     {
-        base.OnDisable();
+        base.OnDestroy();
         FindObjectOfType<CardReader>().unlockEvent -= UnlockDoor;
     }
+    
 
     protected override void OnActivated(ActivateEventArgs args)
     {
@@ -103,6 +106,8 @@ public class DoorHandle : XRBaseInteractable
     {
         float dotProduct = Vector3.Dot(dir1, dir2);
         forceDirection = dotProduct > 0 ? 1 : -1; // should be somewhere else, also there is a func for this
+        //    return dotProduct <= -1 + allowedSwipeMargin || dotProduct >= -1 -allowedSwipeMargin;
+ 
         return Mathf.Abs(dotProduct) > forceRange;
     }
     
@@ -121,4 +126,6 @@ public class DoorHandle : XRBaseInteractable
         // rotate bar
         // fade away bar
     }
+    
+  
 }

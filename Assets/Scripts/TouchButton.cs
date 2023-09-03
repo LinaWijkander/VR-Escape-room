@@ -9,16 +9,15 @@ using UnityEngine.XR.Interaction.Toolkit;
 public class TouchButton : XRBaseInteractable
 {
     [SerializeField] private Material hoverMaterial;
-    private Material originalMaterial;
-    private MeshRenderer meshRenderer;
-   private NumberPad numberPad;
-   //private bool hoverActive;
+    private ChangeMaterial materialChanger;
+    private NumberPad numberPad;
+    private int numberOfInteractors;
 
     protected override void Awake()
     {
         base.Awake();
-        meshRenderer = GetComponent<MeshRenderer>();
-        originalMaterial = meshRenderer.material;
+        
+        materialChanger = GetComponent<ChangeMaterial>();
         numberPad = FindObjectOfType<NumberPad>();
     }
 
@@ -26,20 +25,27 @@ public class TouchButton : XRBaseInteractable
     {
         base.OnHoverEntered(args); // innan eller efter return check
 
-        if (isHovered)
-            return;
-        
-        // detect button press - change color
-        numberPad.OnNumpadKeyPressed(GetComponent<TMP_Text>().text);
-        meshRenderer.material = hoverMaterial;
-        
+        if (numberOfInteractors == 0)
+        {
+            numberPad.OnNumpadKeyPressed(GetComponentInChildren<TMP_Text>().text);
+            materialChanger.SetOtherMaterial();
+        }
+
+        numberOfInteractors++;
     }
 
     protected override void OnHoverExited(HoverExitEventArgs args)
     {
         base.OnHoverExited(args);
-        // change back color
-        meshRenderer.material = originalMaterial;
+
+        numberOfInteractors--;
         
+        if(numberOfInteractors == 0)
+            materialChanger.SetOriginalMaterial();
+    }
+    
+    public override bool IsHoverableBy(IXRHoverInteractor interactor)
+    {
+        return base.IsHoverableBy(interactor) && (interactor is XRDirectInteractor);
     }
 }
